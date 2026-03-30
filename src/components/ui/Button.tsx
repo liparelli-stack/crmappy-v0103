@@ -19,7 +19,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 // ─── VARIANTES ───────────────────────────────────────────────────────────────
 
 const variantClasses: Record<ButtonVariant, string> = {
-  // Primário — azul CRMappy com glow
+  // Primário — azul CRMAppy com glow
   primary: [
     'bg-accent text-white font-medium',
     'border border-accent-border',

@@ -87,7 +87,7 @@ export function Badge({
   )
 }
 
-// ─── MAPEAMENTOS SEMÂNTICOS CRMappy ──────────────────────────────────────────
+// ─── MAPEAMENTOS SEMÂNTICOS CRMAppy ──────────────────────────────────────────
 
 /** Mapeia status de deal → variante de badge */
 export function DealStatusBadge({ status }: { status: 'aberta' | 'ganha' | 'perdida' | 'em_espera' }) {

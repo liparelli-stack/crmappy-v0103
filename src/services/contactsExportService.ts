@@ -37,7 +37,7 @@ const fetchAllRows = async <T = any>(
     const to = from + PAGE_SIZE - 1;
 
     const { data, error } = await supabase
-      .from<T>(tableName)
+      .from(tableName)
       .select(columns)
       .range(from, to);
 
@@ -81,9 +81,7 @@ type RawProfile = {
  *  - profiles.auth_user_id é esse mesmo auth_user_id;
  *  - profiles.full_name é o nome do responsável.
  */
-export const fetchContactsForExport = async (): Promise<
-  (ContactWithCompany & { owner_full_name: string })
-[]> => {
+export const fetchContactsForExport = async (): Promise<(ContactWithCompany & { owner_full_name: string })[]> => {
   // 1) Buscar contatos crus
   const rawContacts = await fetchAllRows<RawContact>('contacts', '*');
   if (!rawContacts.length) {

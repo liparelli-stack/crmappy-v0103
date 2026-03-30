@@ -112,7 +112,7 @@ export const AuthPage = () => {
       <div className="w-full max-w-sm p-8 space-y-6 bg-plate dark:bg-dark-s1 rounded-2xl neumorphic-convex">
 
         <div className="flex justify-center mb-2">
-          <img src="/logo-login.png" alt="CRMappy" className="h-12 w-auto" />
+          <img src="/logo-login.png" alt="CRMAppy" className="h-12 w-auto" />
         </div>
 
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-dark-t1">

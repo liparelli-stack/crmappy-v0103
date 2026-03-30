@@ -53,7 +53,7 @@ export default {
         'sepia-t3': '#9a7d5a',
 
         // --- Accent / Primário ---
-        // Azul CRMappy — diferenciado do Tailwind blue-600 (#2563EB)
+        // Azul CRMAppy — diferenciado do Tailwind blue-600 (#2563EB)
         accent: {
           DEFAULT:  '#3b68f5', // dark
           light:    '#4f7cff', // dark hover

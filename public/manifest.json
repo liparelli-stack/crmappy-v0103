@@ -1,0 +1,15 @@
+{
+  "name": "CRMAppy",
+  "short_name": "CRMAppy",
+  "start_url": "/crmappy/",
+  "display": "standalone",
+  "background_color": "#0c0d10",
+  "theme_color": "#0c0d10",
+  "icons": [
+    {
+      "src": "/crmappy/logo-login.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
