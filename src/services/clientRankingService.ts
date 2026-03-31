@@ -46,6 +46,7 @@ export interface ClientRankingRow {
   lastInteraction: string;
   totalChats: number;
   chatsWithBudget: number;
+  avgChatIntervalDays: number | null;
   espera: {
     total: number;
     qty: number;
@@ -95,8 +96,9 @@ function mapRow(r: Record<string, unknown>): ClientRankingRow {
     companyName:     String(r.r_company_name ?? ""),
     ownerName:       r.r_owner_name != null ? String(r.r_owner_name) : null,
     lastInteraction:  String(r.r_last_interaction ?? ""),
-    totalChats:       toFloat(r.r_total_chats),
-    chatsWithBudget:  toFloat(r.r_chats_with_budget),
+    totalChats:           toFloat(r.r_total_chats),
+    chatsWithBudget:      toFloat(r.r_chats_with_budget),
+    avgChatIntervalDays:  r.r_avg_chat_interval_days != null ? parseFloat(String(r.r_avg_chat_interval_days)) : null,
     espera: {
       total:    toFloat(r.r_espera_total),
       qty:      toFloat(r.r_espera_qty),

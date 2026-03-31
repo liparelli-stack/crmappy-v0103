@@ -25,6 +25,8 @@ interface Props {
   selectedCompanyId: string | null;
   onSelect: (id: string) => void;
   onHover?: (id: string) => void;
+  collapsed?: boolean;
+  sortAsc?: boolean;
 }
 
 const EmpresasAgrupadasList: React.FC<Props> = ({
@@ -32,6 +34,8 @@ const EmpresasAgrupadasList: React.FC<Props> = ({
   selectedCompanyId,
   onSelect,
   onHover,
+  collapsed = false,
+  sortAsc = true,
 }) => {
   const grupos = useMemo(() => {
     const map: Record<string, CompanyWithActionCount[]> = {};
@@ -48,7 +52,10 @@ const EmpresasAgrupadasList: React.FC<Props> = ({
     return map;
   }, [empresas]);
 
-  const letras = useMemo(() => Object.keys(grupos).sort(), [grupos]);
+  const letras = useMemo(
+    () => Object.keys(grupos).sort((a, b) => sortAsc ? a.localeCompare(b) : b.localeCompare(a)),
+    [grupos, sortAsc]
+  );
 
   // Inicializa com todos os grupos abertos (empresas já carregadas pelo pai antes do mount)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
@@ -101,7 +108,7 @@ const EmpresasAgrupadasList: React.FC<Props> = ({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden pb-2">
       {letras.map((letra) => {
         const isOpen = expandedGroups.has(letra);
         const emps = grupos[letra];
@@ -136,7 +143,7 @@ const EmpresasAgrupadasList: React.FC<Props> = ({
             </button>
 
             {/* Itens do grupo */}
-            {isOpen && (
+            {isOpen && !collapsed && (
               <ul>
                 {emps.map((emp) => {
                   const isActive = selectedCompanyId === emp.id;

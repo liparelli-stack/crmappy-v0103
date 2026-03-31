@@ -29,6 +29,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useAuth } from '@/contexts/AuthContext';
+import ClosureAnomalies from '@/components/HubGestao/ClosureAnomalies';
 import { useToast } from '@/contexts/ToastContext';
 import { getCurrentProfile } from '@/services/profilesService';
 import { getVendedorData, createBaseline, checkBaselineExists, getDetalhamentoMes } from '@/services/monthlyClosureService';
@@ -210,6 +211,10 @@ const MonthlyClosurePage: React.FC = () => {
   // Hook recebe '' quando null → hook interno tem `enabled: !!mes`, não dispara
   const { data, isLoading, isError, error, isClosed, closeMutation } =
     useMonthlyClosureData(selectedMes ?? '');
+
+  const tenantId    = currentProfileLite?.tenantId ?? '';
+  const parsedYear  = selectedMes ? parseInt(selectedMes.split('-')[0], 10) : 0;
+  const parsedMonth = selectedMes ? parseInt(selectedMes.split('-')[1], 10) : 0;
 
   const hasData = !!data && (data.qty_ganha > 0 || data.total_ganha > 0 ||
     data.qty_perdida > 0 || data.qty_aberta > 0 || data.qty_encerrada > 0);
@@ -988,6 +993,9 @@ const MonthlyClosurePage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Anomalias de fechamento */}
+          <ClosureAnomalies tenantId={tenantId} year={parsedYear} month={parsedMonth} />
 
           {/* Erro ao fechar mês */}
           {closeMutation.isError && (

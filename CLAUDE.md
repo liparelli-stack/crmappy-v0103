@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **CRM Appy v0.1.2** | Branch: `crmappy-v0102`
+> **CRM Appy v0.1.3** | Branch: `crmappy-v0103`
 
 ---
 
@@ -51,7 +51,7 @@ CRM Appy é uma plataforma CRM moderna para gestão de relacionamento com client
 | Animações | Framer Motion 11 |
 | Drag & Drop | @dnd-kit/core + @dnd-kit/sortable |
 | Gráficos | ECharts (echarts-for-react) |
-| Exportação | xlsx, jsPDF + jspdf-autotable, docx, file-saver |
+| Exportação | xlsx, jsPDF + jspdf-autotable, html2pdf.js, jszip, docx, file-saver |
 | Markdown | react-markdown + rehype-raw + remark-gfm |
 | Utilitários | lodash-es, date-fns, clsx |
 | Banco de dados | Supabase (PostgreSQL 17.6) |
@@ -77,10 +77,10 @@ src/
 │   ├── Knowledge/
 │   ├── Shared/
 │   └── UI/             # Design System v0101 (componentes base)
-├── services/           # 34 serviços — funções puras, sem estado
+├── services/           # 37 serviços — funções puras, sem estado
 │   ├── ai/             # actionsAiService, geminiChatService, vision360AiService
 │   └── backup/         # backupService, backupHistoryService, backupTablesCatalog
-├── hooks/              # 21 hooks customizados (React Query)
+├── hooks/              # 23 hooks customizados (React Query)
 ├── types/              # 16 arquivos — schemas Zod + tipos TypeScript inferidos
 ├── contexts/           # AuthContext, ToastContext, DebugContext
 ├── utils/              # Helpers + exporters (Excel, PDF, CSV)
@@ -88,12 +88,18 @@ src/
 ├── superMa/            # Módulo Master Admin (impersonação)
 ├── schemas/            # Schemas adicionais
 ├── providers/          # Providers React
-├── config/             # llmPreset.ts, llmProviders.ts + outras constantes
+├── config/             # llmPreset.ts, llmProviders.ts, actionConstants.ts, noteSubjects.ts
 ├── data/               # Dados estáticos
 └── lib/
     └── supabaseClient.ts
 supabase/
 ├── functions/          # Edge Functions (Deno)
+│   ├── _shared/cors.ts # Headers CORS compartilhados
+│   ├── ma-impersonation/
+│   ├── create-user-with-profile/
+│   ├── delete-user/
+│   ├── generate-backup-full/
+│   └── monthly-auto-close/
 └── migrations/         # Migrations incrementais SQL
 ```
 
@@ -107,7 +113,8 @@ Page → Hook (src/hooks/use*.ts) → Service (src/services/*Service.ts) → Sup
 
 - **Hooks** gerenciam cache via React Query; **não usar** `useState + useEffect` para fetch.
   - **Exceção:** hooks de lookup simples para dropdowns (`useCompaniesLookup.ts`, `useSalespersons.ts`) usam `useState + useEffect` — listas estáticas sem necessidade de cache/invalidação.
-- **Services** são funções puras sem estado.
+- **Services** são funções puras sem estado. `agendaXBridge.ts` é um bridge entre AgendaX e AgendaPage.
+- `dashboardService_vw.ts` usa views Postgres (sufixo `_vw`) — alternativa ao `dashboardService.ts` via RPCs.
 - **RLS é a proteção primária** — filtro no código é camada adicional, não substituto.
 
 ---
@@ -257,8 +264,10 @@ boxShadow: {
   'sh2': '0 2px 8px rgba(0,0,0,0.38), 0 8px 28px rgba(0,0,0,0.28)',
 }
 
-borderRadius: { 'r': '8px', 'rlg': '12px', 'rxl': '16px' }
+borderRadius: { 'sm': '6px', 'r': '8px', 'rlg': '12px', 'rxl': '16px', '2xl': '20px' }
 fontFamily:   { 'sans': ['DM Sans'], 'mono': ['DM Mono'] }
+// Tema sepia (tokens 'sepia-bg', 'sepia-s1', etc.) — tema alternativo ativo
+// dark mode no código é alias para sepia; não há tema escuro independente
 ```
 
 Padrão de cards:
@@ -332,6 +341,8 @@ const cleaned = response.replace(/\*\*(.*?)\*\*/g, '$1'); // remove markdown bol
 ```env
 VITE_SUPABASE_URL="https://oadnblyoqmqvnfekisxp.supabase.co"
 VITE_SUPABASE_ANON_KEY="<anon-key-jwt>"
+VITE_SUPER_MA_MODE="true"          # habilita painel Master Admin (opcional)
+VITE_GIT_SHA="<commit-sha>"        # injetado automaticamente pelo Netlify via netlify.toml
 ```
 
 Alias `@/` aponta para `src/` — usar sempre em vez de caminhos relativos.
@@ -343,17 +354,19 @@ Alias `@/` aponta para `src/` — usar sempre em vez de caminhos relativos.
 - **Hosting:** Netlify
 - **Domínio:** `https://cognosone.pro`
 - **Subpath:** aplicação publicada em `https://cognosone.pro/crmappy`
-- **Branch de deploy:** `crmappy-v0102` (deploy automático a cada `git push`)
+- **Branch de deploy:** `crmappy-v0103` (deploy automático a cada `git push`)
 
 ### Roteamento SPA
 
-React Router **sem** `basename` em `src/main.tsx`:
+A navegação é feita via **`useState + switch(activeView)`** em `App.tsx` — **não usa `<Routes>` do React Router**. O `BrowserRouter` está presente em `main.tsx` mas não é usado para roteamento de views.
 
 ```tsx
-<BrowserRouter>
-  <App />
-</BrowserRouter>
+// App.tsx — padrão real de navegação
+const [activeView, setActiveView] = useState("Dashboard");
+// switch(activeView) renderiza o componente correspondente
 ```
+
+Views disponíveis: `Dashboard`, `Cockpit`, `Vision360`, `HubGestao`, `Negócios`, `AgendaX`, `Agenda`, `Conhecimento`, `Orçamentos`, `Catálogos`, `Listas`, `Suporte`, `Configurações`.
 
 Redirect configurado em `netlify.toml`:
 

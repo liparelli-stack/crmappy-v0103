@@ -15,19 +15,23 @@
 -- ===================================================
 */
 
-import React, { useState } from 'react';
-import { CalendarCheck, Target, MessageSquare, Trophy, BarChart2, LucideIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CalendarCheck, Target, MessageSquare, Trophy, BarChart2, Star, Filter, LucideIcon } from 'lucide-react';
 import clsx from 'clsx';
 import MonthlyClosurePage from './MonthlyClosurePage';
 import SalesTargetsPage from './SalesTargetsPage';
 import ChatAnalysisPage from './ChatAnalysisPage';
 import RankingClientes from '../components/HubGestao/RankingClientes';
 import BaseDiagnostics from '../components/HubGestao/BaseDiagnostics';
+import TopClientes from '@/components/HubGestao/TopClientes';
+import FunilLeads from '@/components/HubGestao/FunilLeads';
+import { useAuth } from '@/contexts/AuthContext';
+import { getCurrentProfile } from '@/services/profilesService';
 
 /* ============================================================
    Tipos
    ============================================================ */
-type Section = 'monthly-closure' | 'sales-targets' | 'chat-analysis' | 'ranking-clientes' | 'base-diagnostics';
+type Section = 'monthly-closure' | 'sales-targets' | 'chat-analysis' | 'ranking-clientes' | 'base-diagnostics' | 'top-clientes' | 'funil-leads';
 
 interface TabItemProps {
   icon: LucideIcon;
@@ -62,6 +66,16 @@ const TabItem: React.FC<TabItemProps> = ({ icon: Icon, label, isActive, onClick 
    ============================================================ */
 const HubGestaoPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<Section>('monthly-closure');
+  const { currentProfileLite } = useAuth();
+  const tenantId = currentProfileLite?.tenantId ?? '';
+  const profile  = currentProfileLite;
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    getCurrentProfile().then((p) => { if (mounted) setIsAdmin(p?.role === 'admin'); });
+    return () => { mounted = false; };
+  }, []);
 
   const sections: { id: Section; label: string; icon: LucideIcon; node: React.ReactNode }[] = [
     {
@@ -93,6 +107,24 @@ const HubGestaoPage: React.FC = () => {
       label: 'Diagnóstico de Base de Empresas',
       icon: BarChart2,
       node: <BaseDiagnostics />,
+    },
+    {
+      id: 'top-clientes',
+      label: 'Top Clientes',
+      icon: Star,
+      node: (
+        <TopClientes
+          tenantId={tenantId}
+          authorUserId={isAdmin ? undefined : profile?.id}
+          isAdmin={isAdmin}
+        />
+      ),
+    },
+    {
+      id: 'funil-leads',
+      label: 'Funil de Leads',
+      icon: Filter,
+      node: <FunilLeads tenantId={tenantId} />,
     },
   ];
 
