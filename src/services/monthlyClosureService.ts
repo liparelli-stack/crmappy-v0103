@@ -420,7 +420,7 @@ export async function getDetalhamentoMes(
   // 1. Buscar chats com budgets (sem filtro de vendedor quando admin)
   let chatQuery = supabase
     .from('chats')
-    .select('id, author_user_id, company_id, budgets')
+    .select('id, author_user_id, company_id, budgets, body, calendar_at')
     .neq('budgets', '[]');
 
   if (targetVendedor !== null) {
@@ -436,7 +436,7 @@ export async function getDetalhamentoMes(
   const companyIds = [...new Set(chats.map((c: any) => c.company_id).filter(Boolean))];
 
   const { data: companies } = companyIds.length
-    ? await supabase.from('companies').select('id, nome, trade_name').in('id', companyIds)
+    ? await supabase.from('companies').select('id, trade_name').in('id', companyIds)
     : { data: [] as any[] };
 
   const companiesMap = new Map((companies ?? []).map((c: any) => [c.id, c]));
@@ -486,7 +486,7 @@ export async function getDetalhamentoMes(
 
       resultado.push({
         vendedor_nome:       vendedor?.full_name ?? 'Vendedor não identificado',
-        cliente_nome:        company?.nome ?? company?.trade_name ?? 'Cliente não vinculado',
+        cliente_nome:        company?.trade_name ?? 'Cliente não vinculado',
         valor:               Number(budget.amount) || 0,
         status_fechamento:   statusNormalizado,
         data_mudanca:        budget.updated_at,
@@ -494,7 +494,10 @@ export async function getDetalhamentoMes(
         mudou_apos:          false,
         dias_ate_fechamento: isTerminal ? dias : null,
         budget_id:           budget.id,
-        chat_id:             chat.id,
+        chat_id: [
+          chat.body ? chat.body.substring(0, 40) : '',
+          chat.calendar_at ? new Date(chat.calendar_at).toLocaleDateString('pt-BR') : '',
+        ].filter(Boolean).join(' — ') || chat.id,
         observacao:          budget.description ?? '',
         motivo_perda:        budget.loss_reason  ?? '',
       });

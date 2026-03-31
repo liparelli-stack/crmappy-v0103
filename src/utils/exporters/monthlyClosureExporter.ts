@@ -224,9 +224,8 @@ export function exportDetalhamentoExcel(
     'Status Atual':       r.status_atual,
     'Mudou Depois?':      r.mudou_apos ? 'Sim' : 'Não',
     'Dias até Fechar':    r.dias_ate_fechamento ?? '',
-    'Budget ID':          r.budget_id,
     'Chat ID':            r.chat_id,
-    'Observação':         r.observacao,
+    'Descrição Orçamento': r.observacao,
     'Motivo Perda':       r.motivo_perda,
   }));
 
@@ -241,9 +240,8 @@ export function exportDetalhamentoExcel(
     { wch: 14 }, // Status Atual
     { wch: 14 }, // Mudou Depois?
     { wch: 14 }, // Dias até Fechar
-    { wch: 32 }, // Budget ID
-    { wch: 32 }, // Chat ID
-    { wch: 28 }, // Observação
+    { wch: 36 }, // Chat ID
+    { wch: 36 }, // Descrição Orçamento
     { wch: 28 }, // Motivo Perda
   ];
 

@@ -167,6 +167,7 @@ const EditActionForm: React.FC<EditActionFormProps> = ({
   const {
     onSubmit, handleOpenNextAction, handleSubmitNext,
     nextOpen, setNextOpen, nextDefaults,
+    submitSucceededRef,
   } = useActionSubmit({
     isEditing,
     editingChatId: editingChat?.id,
@@ -178,9 +179,15 @@ const EditActionForm: React.FC<EditActionFormProps> = ({
   });
 
   useEffect(() => {
-    if (!nextOpen) reset(defaults);
+    if (!nextOpen) {
+      if (submitSucceededRef.current) {
+        submitSucceededRef.current = false;
+        reset(defaults); // limpa form só após salvar com sucesso
+      }
+      // se fechou sem salvar: NÃO reseta — preserva os dados do form
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nextOpen]); // Intencional: reset apenas quando o modal de próxima ação abre/fecha, não em cada re-render de defaults
+  }, [nextOpen]);
 
   // Quando contacts muda (novo contato inserido) e o valor atual não está na lista,
   // auto-seleciona o primeiro contato disponível para evitar contact_id vazio no submit.

@@ -15,7 +15,7 @@
 */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, X as XIcon, Search as SearchIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, X as XIcon, Search as SearchIcon } from 'lucide-react';
 import {
   listCompaniesWithActiveActions,
   getCompanyDetails,
@@ -41,22 +41,6 @@ const CockpitPage: React.FC = () => {
   const tenantId = currentProfileLite?.tenantId ?? null;
 
   // Estados principais
-  const [collapsed, setCollapsed] = useState(() =>
-    localStorage.getItem('crmappy.activeCompanies.collapsed') === 'true'
-  );
-  const toggleCollapsed = () => {
-    const next = !collapsed;
-    setCollapsed(next);
-    localStorage.setItem('crmappy.activeCompanies.collapsed', String(next));
-  };
-  const [sortAsc, setSortAsc] = useState(() =>
-    localStorage.getItem('crmappy.activeCompanies.sortAsc') !== 'false'
-  );
-  const toggleSort = () => {
-    const next = !sortAsc;
-    setSortAsc(next);
-    localStorage.setItem('crmappy.activeCompanies.sortAsc', String(next));
-  };
   const [companies, setCompanies] = useState<CompanyWithActionCount[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [selectedCompanyDetails, setSelectedCompanyDetails] = useState<CompanyDetails | null>(null);
@@ -369,24 +353,6 @@ const CockpitPage: React.FC = () => {
             )}
           </div>
 
-          <div className="flex items-center justify-between mb-4 px-2">
-            <h2 className="text-lg font-bold">Empresas com Ações Ativas</h2>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={toggleSort}
-                className="text-xs font-medium px-2 py-0.5 rounded bg-light-s2 dark:bg-dark-s2 text-light-t2 dark:text-dark-t2 border border-light-bmd dark:border-dark-bmd hover:text-light-t1 dark:hover:text-dark-t1 cursor-pointer transition-colors"
-              >
-                {sortAsc ? 'A→Z' : 'Z→A'}
-              </button>
-              <button type="button" onClick={toggleCollapsed} className="p-0.5">
-                {collapsed
-                  ? <ChevronUp   className="w-4 h-4 text-light-t3 dark:text-dark-t3 cursor-pointer hover:text-light-t1 dark:hover:text-dark-t1 transition-colors" />
-                  : <ChevronDown className="w-4 h-4 text-light-t3 dark:text-dark-t3 cursor-pointer hover:text-light-t1 dark:hover:text-dark-t1 transition-colors" />
-                }
-              </button>
-            </div>
-          </div>
           {isLoadingCompanies ? (
             <div className="space-y-2">
               {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
@@ -397,8 +363,6 @@ const CockpitPage: React.FC = () => {
               selectedCompanyId={selectedCompanyId}
               onSelect={throttleSelect}
               onHover={prefetchCompanyDetails}
-              collapsed={collapsed}
-              sortAsc={sortAsc}
             />
           )}
         </div>

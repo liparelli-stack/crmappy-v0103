@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type { ActionFormData } from "@/types/chat";
 import { PRIORITY_OPTIONS } from "@/types/chat";
 import * as chatsService from "@/services/chatsService";
@@ -33,6 +33,7 @@ export interface UseActionSubmitReturn {
   setNextOpen: (v: boolean) => void;
   nextDefaults: NextDefaults;
   stagedParent: ActionFormData | null;
+  submitSucceededRef: React.MutableRefObject<boolean>;
 }
 
 function normalizePriority(p: string | null | undefined): string | null {
@@ -80,6 +81,7 @@ export function useActionSubmit({
     contact_id: null,
   });
   const [stagedParent, setStagedParent] = useState<ActionFormData | null>(null);
+  const submitSucceededRef = useRef(false);
 
   const onSubmit = async (formData: ActionFormData) => {
     if (!formData.action) return addToast("Selecione uma Ação.", "error");
@@ -232,6 +234,7 @@ export function useActionSubmit({
 
       addToast("Ação atual e próxima ação registradas.", "success");
       dispatchRefreshEvents(parentCompanyId);
+      submitSucceededRef.current = true;
       setNextOpen(false);
       onSaved?.();
     } catch (e: any) {
@@ -247,5 +250,6 @@ export function useActionSubmit({
     setNextOpen,
     nextDefaults,
     stagedParent,
+    submitSucceededRef,
   };
 }
