@@ -57,33 +57,25 @@ const EmpresasAgrupadasList: React.FC<Props> = ({
     [grupos, sortAsc]
   );
 
-  // Inicializa com todos os grupos abertos (empresas já carregadas pelo pai antes do mount)
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
-    const letters = new Set<string>();
-    for (const emp of empresas) {
-      const letra = normalizeText(emp.trade_name)[0]?.toUpperCase() ?? '#';
-      letters.add(letra);
-    }
-    return letters;
-  });
+  // Estado por grupo: {} = todos expandidos por padrão
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(() => ({}));
 
-  // Auto-expande grupos que aparecem após recarregamentos (nova empresa em nova letra)
+  // Sincroniza quando o prop collapsed (toggleAll do pai) muda
   useEffect(() => {
-    setExpandedGroups((prev) => {
-      const novos = letras.filter((l) => !prev.has(l));
-      if (novos.length === 0) return prev;
-      return new Set([...prev, ...novos]);
-    });
-  }, [letras]);
+    const newState: Record<string, boolean> = {};
+    letras.forEach((l) => { newState[l] = collapsed; });
+    setCollapsedGroups(newState);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collapsed]);
 
   // Auto-expande o grupo da empresa selecionada quando muda externamente
   useEffect(() => {
     if (!selectedCompanyId) return;
     for (const [letra, emps] of Object.entries(grupos)) {
       if (emps.some((e) => e.id === selectedCompanyId)) {
-        setExpandedGroups((prev) => {
-          if (prev.has(letra)) return prev;
-          return new Set([...prev, letra]);
+        setCollapsedGroups((prev) => {
+          if (!prev[letra]) return prev;
+          return { ...prev, [letra]: false };
         });
         break;
       }
@@ -91,12 +83,7 @@ const EmpresasAgrupadasList: React.FC<Props> = ({
   }, [selectedCompanyId, grupos]);
 
   const toggleGroup = (letra: string) => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(letra)) next.delete(letra);
-      else next.add(letra);
-      return next;
-    });
+    setCollapsedGroups((prev) => ({ ...prev, [letra]: !prev[letra] }));
   };
 
   if (empresas.length === 0) {
@@ -110,7 +97,7 @@ const EmpresasAgrupadasList: React.FC<Props> = ({
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden pb-2">
       {letras.map((letra) => {
-        const isOpen = expandedGroups.has(letra);
+        const isOpen = !(collapsedGroups[letra] ?? false);
         const emps = grupos[letra];
 
         return (
@@ -143,7 +130,7 @@ const EmpresasAgrupadasList: React.FC<Props> = ({
             </button>
 
             {/* Itens do grupo */}
-            {isOpen && !collapsed && (
+            {isOpen && (
               <ul>
                 {emps.map((emp) => {
                   const isActive = selectedCompanyId === emp.id;
