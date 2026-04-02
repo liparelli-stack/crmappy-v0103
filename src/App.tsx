@@ -35,6 +35,7 @@ import { AuthPage } from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { useActivityLogger } from "./hooks/useActivityLogger";
+import { useSysExport } from "./hooks/useSysExport";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useSuperMaController } from "./superMa/useSuperMaController";
@@ -89,7 +90,9 @@ const AppContent = () => {
 
   const { logActivity } = useActivityLogger();
 
-  useEffect(() => { logActivity('page_view', activeView); }, [activeView]);
+  useEffect(() => { if (!session) return; logActivity('page_view', activeView); }, [activeView, session]);
+
+  useSysExport();
 
   // -------------------------------------------------
   // Tema base + Super MA + reset em logoff — intocado

@@ -378,7 +378,19 @@ const CockpitPage: React.FC = () => {
             </div>
           ) : selectedCompanyDetails ? (
             <>
-              <CompanyDetailsCard companyDetails={selectedCompanyDetails} />
+              <CompanyDetailsCard
+                companyDetails={selectedCompanyDetails}
+                onContactSaved={(saved) => {
+                  setSelectedCompanyDetails(prev => {
+                    if (!prev) return prev;
+                    const exists = prev.contacts?.some(c => c.id === saved.id);
+                    const contacts = exists
+                      ? prev.contacts.map(c => c.id === saved.id ? { ...c, ...saved } : c)
+                      : [...(prev.contacts ?? []), { ...saved, channels: [] }];
+                    return { ...prev, contacts };
+                  });
+                }}
+              />
               <RegisterActionCard
                 companyDetails={selectedCompanyDetails}
                 editingChat={null as unknown as EditingChat}

@@ -12,6 +12,7 @@ import type { ContactChannel } from '@/types/channel';
 
 interface CompanyDetailsCardProps {
   companyDetails: CompanyDetails;
+  onContactSaved?: (contact: Contact) => void;
 }
 
 /* =========================== */
@@ -63,7 +64,7 @@ const IconBtn: React.FC<{ onClick: () => void; title: string; children: React.Re
 /* =========================== */
 /* COMPONENTE PRINCIPAL */
 /* =========================== */
-const CompanyDetailsCard: React.FC<CompanyDetailsCardProps> = ({ companyDetails }) => {
+const CompanyDetailsCard: React.FC<CompanyDetailsCardProps> = ({ companyDetails, onContactSaved }) => {
   // Estado local — atualizado otimisticamente após saves
   const [data, setData] = useState<CompanyDetails>(companyDetails);
 
@@ -88,6 +89,7 @@ const CompanyDetailsCard: React.FC<CompanyDetailsCardProps> = ({ companyDetails 
     setData((prev) => {
       const exists = prev.contacts.some((c) => c.id === saved.id);
       if (exists) {
+        onContactSaved?.(saved);
         return {
           ...prev,
           contacts: prev.contacts.map((c) =>
@@ -96,6 +98,7 @@ const CompanyDetailsCard: React.FC<CompanyDetailsCardProps> = ({ companyDetails 
         };
       }
       // Novo contato: adiciona com channels vazio
+      onContactSaved?.(saved);
       return {
         ...prev,
         contacts: [...prev.contacts, { ...saved, channels: [] } as ContactWithChannels],

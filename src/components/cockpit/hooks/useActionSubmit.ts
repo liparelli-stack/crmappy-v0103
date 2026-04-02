@@ -129,7 +129,7 @@ export function useActionSubmit({
         if (hadInline) addToast("Orçamentos pendentes salvos.", "success");
       }
 
-      addToast(isEditing ? "Ação atualizada." : "Ação registrada.", "success");
+      addToast(isEditing ? "Ação atualizada." : "Ação registrada.", "success", { scope: 'global' });
       dispatchRefreshEvents(effectiveCompanyId);
       onSaved();
     } catch (e: any) {
@@ -232,7 +232,7 @@ export function useActionSubmit({
         reply_to_id: parent.id,
       } as any);
 
-      addToast("Ação atual e próxima ação registradas.", "success");
+      addToast("Ação atual e próxima ação registradas.", "success", { scope: 'global' });
       dispatchRefreshEvents(parentCompanyId);
       submitSucceededRef.current = true;
       setNextOpen(false);
