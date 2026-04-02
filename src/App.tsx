@@ -34,6 +34,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AuthPage } from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { useMediaQuery } from "./hooks/useMediaQuery";
+import { useActivityLogger } from "./hooks/useActivityLogger";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useSuperMaController } from "./superMa/useSuperMaController";
@@ -85,6 +86,10 @@ const AppContent = () => {
 
   const [activeView, setActiveView] = useState("Dashboard");
   const [isDebugOverlayOpen, setIsDebugOverlayOpen] = useState(false);
+
+  const { logActivity } = useActivityLogger();
+
+  useEffect(() => { logActivity('page_view', activeView); }, [activeView]);
 
   // -------------------------------------------------
   // Tema base + Super MA + reset em logoff — intocado

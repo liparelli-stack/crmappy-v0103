@@ -409,7 +409,7 @@ const ScheduleActionModal: React.FC<ScheduleActionModalProps> = ({
             name="calendar_at"
             control={control}
             render={({ field }) => (
-              <Input type="date" label="Data*" {...field} className="h-11" />
+              <Input type="date" label="Data*" {...field} className="bg-[#F9FAFB] border border-gray-300 text-gray-900 rounded-lg px-3 py-2 text-[13px] w-full" />
             )}
           />
           <TimePickerRHF

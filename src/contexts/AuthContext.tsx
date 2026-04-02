@@ -27,9 +27,10 @@
 -- ===================================================
 */
 
-import { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import { createContext, useState, useEffect, useRef, useContext, ReactNode } from 'react';
 import type { AuthSession, AuthError, UserCredentials, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
+import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 /* ============================ Tipos de Contexto ============================ */
 type SalutationPref = 'masculino' | 'feminino' | 'neutro';
@@ -131,6 +132,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // << publicado: usado pelo Dashboard e demais módulos
   const [currentProfileLite, setCurrentProfileLite] = useState<CurrentProfileLite | null>(defaultLite);
 
+  const { logLogin, logLogout } = useActivityLogger();
+  const logLoginRef  = useRef(logLogin);
+  const logLogoutRef = useRef(logLogout);
+  useEffect(() => { logLoginRef.current  = logLogin;  }, [logLogin]);
+  useEffect(() => { logLogoutRef.current = logLogout; }, [logLogout]);
+
   // Propaga evento global para consumidores legados (se existirem)
   const dispatchUserReady = (u: User | null) => {
     if (!u) return;
@@ -218,6 +225,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       if (event === 'SIGNED_OUT') {
+        logLogoutRef.current();
         setIsPasswordRecovery(false);
         setIdentityError(null);
         setCurrentProfileLite(defaultLite);
@@ -225,6 +233,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
+        if (event === 'SIGNED_IN') logLoginRef.current();
         dispatchUserReady(session.user);
         // publica imediatamente em branco e preenche quando chegar
         setCurrentProfileLite(defaultLite);
