@@ -1,6 +1,6 @@
 const APP_VERSION = 'v0102';
 const BUILD_DATE = '3003';
-const GIT_SHA = '39f5778';
+const GIT_SHA = 'cb58cbd';
 
 export function AppVersion() {
   return (
