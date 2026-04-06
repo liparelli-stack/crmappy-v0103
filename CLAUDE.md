@@ -406,6 +406,44 @@ Redirect configurado em `netlify.toml`:
 
 ---
 
+## Armadilhas Conhecidas
+
+### ToastContext — escopo modal vs global
+
+`ToastContext` tem dois escopos: `global` (padrão) e `modal`. Quando `ScheduleActionModal` está aberto, `setModalScope(true)` é chamado e **todos os toasts sem `opts.scope` explícito vão para o escopo modal**. Se o toast é disparado após fechar o modal (mas antes do cleanup do `useEffect`), ele some silenciosamente porque o portal `#modal-toast-portal` foi desmontado.
+
+**Regra:** toasts de sucesso/erro que devem sobreviver ao fechamento de modal sempre devem passar `{ scope: 'global' }`:
+```ts
+addToast("Mensagem.", "success", { scope: 'global' });
+```
+
+### CockpitPage — exceção ao React Query
+
+`CockpitPage` é a exceção ao padrão React Query do projeto. Usa cache manual (`companyCache.current: Record<string, CompanyDetails>`) + `useState(selectedCompanyDetails)`. Consequências:
+- `queryClient.invalidateQueries` **não** atualiza dados do Cockpit
+- Para propagar mudanças de empresa/contatos após uma operação, chamar `setSelectedCompanyDetails(prev => ...)` diretamente no callback ou usar `reloadDetailsIfActive(id)` para refetch completo
+- `CompanyDetailsCard` mantém estado local otimista separado — mudanças locais (edição de contato) devem ser propagadas via prop `onContactSaved` para sincronizar o `selectedCompanyDetails` do pai
+
+### AuthContext — profile completo não exposto
+
+`useAuth()` retorna apenas `currentProfileLite` (`{ id, tenantId, displayName, salutationPref, timezone }`). Campos como `is_master_admin`, `mfa_enabled`, `role`, `kb_can_edit` **não estão disponíveis** via contexto — buscar diretamente:
+```ts
+const { user } = useAuth();
+const { data } = await supabase
+  .from('profiles')
+  .select('is_master_admin')
+  .eq('auth_user_id', user.id)
+  .single();
+```
+
+### Hooks de sistema (App.tsx)
+
+Três hooks globais são registrados no topo de `AppContent` em `App.tsx`:
+- `useActivityLogger` — fire-and-forget para `supabase.rpc('log_activity')`. `page_view` só dispara se `session` existir.
+- `useSysExport` — exporta `activity_logs` via `Ctrl+Shift+X`; guarda `is_master_admin` via fetch direto na tabela `profiles`.
+
+---
+
 ## Pendências com Prazo
 
 | Prazo | Item |

@@ -120,10 +120,19 @@ const CompanyDetailsCard: React.FC<CompanyDetailsCardProps> = ({ companyDetails,
   // ---- Derivações de display ----
   const {
     trade_name, legal_name, tax_id, email, phone, website,
-    qualification, address_line, city, state, zip_code, contacts,
+    qualification, address_line, city, state, zip_code, contacts, kind,
   } = data;
 
   const fullAddress = [address_line, city, state, zip_code].filter(Boolean).join(', ');
+
+  const formatCNPJ = (v: string) =>
+    v.replace(/\D/g, '').replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+
+  const KIND_LABEL: Record<string, { label: string; className: string }> = {
+    client:   { label: 'Cliente',   className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 ring-2 ring-red-500' },
+    prospect: { label: 'Prospect',  className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 ring-2 ring-red-500' },
+    lead:     { label: 'Lead',      className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 ring-2 ring-red-500' },
+  };
   const editingContact = editingContactId
     ? contacts.find((c) => c.id === editingContactId)
     : null;
@@ -160,13 +169,23 @@ const CompanyDetailsCard: React.FC<CompanyDetailsCardProps> = ({ companyDetails,
             </IconBtn>
           </div>
 
-          {qualification && qualification > 0 && (
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className={clsx('h-5 w-5', i < qualification ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-dark-t3')} />
-              ))}
-            </div>
-          )}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {kind && KIND_LABEL[kind] && (
+              <span className={clsx(
+                'text-xs font-medium px-2.5 py-0.5 rounded-full',
+                KIND_LABEL[kind].className
+              )}>
+                {KIND_LABEL[kind].label}
+              </span>
+            )}
+            {qualification && qualification > 0 && (
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className={clsx('h-5 w-5', i < qualification ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-dark-t3')} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {legal_name && <p className="text-gray-500 dark:text-dark-t2">{legal_name}</p>}
@@ -178,7 +197,7 @@ const CompanyDetailsCard: React.FC<CompanyDetailsCardProps> = ({ companyDetails,
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-700 dark:text-dark-t1">
           {fullAddress && <span className="inline-flex items-center"><MapPin className="h-4 w-4 mr-1.5" />{fullAddress}</span>}
-          {tax_id && <span className="inline-flex items-center"><MapPin className="h-4 w-4 mr-1.5" />CNPJ {tax_id}</span>}
+          {tax_id && <span className="inline-flex items-center"><MapPin className="h-4 w-4 mr-1.5" />CNPJ {formatCNPJ(tax_id)}</span>}
         </div>
       </header>
 
